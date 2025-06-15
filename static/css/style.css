@@ -1,0 +1,36 @@
+.container {
+    max-width: 1200px;
+    min-width: 1200px;
+}
+
+.d-inline-block {
+    border: 0px;
+    text-align: center;
+    margin: 0 -2px;
+    /* padding: 10px; */
+}
+
+.bolded { font-weight: bold; }
+
+.tldr{
+    margin-top:40px;
+    margin-bottom:23px;
+    margin-left:25px;
+    font-family:Ubuntu,Helvetica,sans-serif;
+    color:rgba(0,0,0,.60);
+    font-size:22px;
+    text-align:left;
+    text-transform:none;
+    text-shadow:none}
+
+/*.center-cropped {
+  width: 164px;
+  height: 164px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  margin: 0 0 0 0;
+}*/
+
+label {
+    font-size: 15px;
+}

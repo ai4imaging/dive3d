@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Diverse Distillation-based Text-to-3D Generation via Score
+        Implicit Matching.">
+  <meta name="keywords" content="Diffusion Models, Text-to-3D, Score Implicit Matching">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+    Dive3D: Diverse Distillation-based Text-to-3D Generation via Score
+        Implicit Matching
+  </title>
+  <script
+    type="module"
+    src="./static/js/model-viewer.min.js"
+  ></script>
+  <style>
+    model-viewer {
+      cursor: grab;
+      display: flex;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+      user-select: none;
+    }
+  </style>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bootstrap.min.css">
+  <link rel="stylesheet" href="./static/css/style.css">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+<!--  <link rel="icon" href="./static/images/favicon.svg">-->
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+  src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  <style>
+        .bold-and-large {
+            font-weight: bold; /* 加粗 */
+            font-size: 24px; /* 加大字体大小，你可以根据需要调整这个值 */
+        }
+    </style>
+</head>
+<body>
+
+<style>
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+</style>
+
+<!--<nav class="navbar" role="navigation" aria-label="main navigation">-->
+<!--  <div class="navbar-brand">-->
+<!--    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">-->
+<!--      <span aria-hidden="true"></span>-->
+<!--      <span aria-hidden="true"></span>-->
+<!--      <span aria-hidden="true"></span>-->
+<!--    </a>-->
+<!--  </div>-->
+<!--  <div class="navbar-menu">-->
+<!--    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">-->
+<!--      <a class="navbar-item" href="https://keunhong.com">-->
+<!--      <span class="icon">-->
+<!--          <i class="fas fa-home"></i>-->
+<!--      </span>-->
+<!--      </a>-->
+
+<!--      <div class="navbar-item has-dropdown is-hoverable">-->
+<!--        <a class="navbar-link">-->
+<!--          More Research-->
+<!--        </a>-->
+<!--        <div class="navbar-dropdown">-->
+<!--          <a class="navbar-item" href="https://hypernerf.github.io">-->
+<!--            HyperNeRF-->
+<!--          </a>-->
+<!--          <a class="navbar-item" href="https://nerfies.github.io">-->
+<!--            Nerfies-->
+<!--          </a>-->
+<!--          <a class="navbar-item" href="https://latentfusion.github.io">-->
+<!--            LatentFusion-->
+<!--          </a>-->
+<!--          <a class="navbar-item" href="https://photoshape.github.io">-->
+<!--            PhotoShape-->
+<!--          </a>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--  </div>-->
+<!--</nav>-->
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Dive3D: Diverse Distillation-based Text-to-3D <br> Generation via Score
+            Implicit Matching</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://openreview.net/profile?id=%7EWeimin_Bai1">Weimin Bai</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://ai4imaging.github.io/latentdem/">Yubo Li</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://wenzhengchen.github.io/">Wenzheng Chen</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://wenzhengchen.github.io/">Weijian Luo</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="http://users.cms.caltech.edu/~hesun/">He Sun</a><sup>1✉</sup>,
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Peking University,</span>
+            <span class="author-block"><sup>2</sup>Xiaohongshu Inc</span>
+            <span class="author-block"><sup>✉</sup>Corresponding Author</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+<!--              &lt;!&ndash; PDF Link. &ndash;&gt;-->
+<!--              <span class="link-block">-->
+<!--                <a href="https://arxiv.org/pdf/2011.12948"-->
+<!--                   class="external-link button is-normal is-rounded is-dark">-->
+<!--                  <span class="icon">-->
+<!--                      <i class="fas fa-file-pdf"></i>-->
+<!--                  </span>-->
+<!--                  <span>Paper</span>-->
+<!--                </a>-->
+<!--              </span>-->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2407.01027"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+<!--              &lt;!&ndash; Video Link. &ndash;&gt;-->
+<!--              <span class="link-block">-->
+<!--                <a href="https://www.youtube.com/watch?v=MrKrnHhk8IA"-->
+<!--                   class="external-link button is-normal is-rounded is-dark">-->
+<!--                  <span class="icon">-->
+<!--                      <i class="fab fa-youtube"></i>-->
+<!--                  </span>-->
+<!--                  <span>Video</span>-->
+<!--                </a>-->
+<!--              </span>-->
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://ai4imaging.github.io/latentdem/"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+<!--              &lt;!&ndash; Dataset Link. &ndash;&gt;-->
+<!--              <span class="link-block">-->
+<!--                <a href="https://github.com/google/nerfies/releases/tag/0.1"-->
+<!--                   class="external-link button is-normal is-rounded is-dark">-->
+<!--                  <span class="icon">-->
+<!--                      <i class="far fa-images"></i>-->
+<!--                  </span>-->
+<!--                  <span>Data</span>-->
+<!--                  </a>-->
+<!--              </span>-->
+            </div>
+<div>
+        <span class="center"><img src="./static/images/img-teaser.jpg" style="width:850px;"></span>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+<!--<section class="hero teaser">-->
+<!--  <div class="container is-max-desktop">-->
+<!--    <div class="hero-body">-->
+<!--      <video id="teaser" autoplay muted loop playsinline height="100%">-->
+<!--        <source src="./static/videos/teaser.mp4"-->
+<!--                type="video/mp4">-->
+<!--      </video>-->
+<!--      <h2 class="subtitle has-text-centered">-->
+<!--        <span class="dnerf">Nerfies</span> turns selfie videos from your phone into-->
+<!--        free-viewpoint-->
+<!--        portraits.-->
+<!--      </h2>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</section>-->
+
+
+<!--<section class="hero is-light is-small">-->
+<!--  <div class="hero-body">-->
+<!--    <div class="container">-->
+<!--      <div id="results-carousel" class="carousel results-carousel">-->
+<!--        <div class="item item-steve">-->
+<!--          <video poster="" id="steve" autoplay controls muted loop playsinline height="100%">-->
+<!--            <source src="./static/videos/steve.mp4"-->
+<!--                    type="video/mp4">-->
+<!--          </video>-->
+<!--        </div>-->
+<!--        <div class="item item-chair-tp">-->
+<!--          <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">-->
+<!--            <source src="./static/videos/chair-tp.mp4"-->
+<!--                    type="video/mp4">-->
+<!--          </video>-->
+<!--        </div>-->
+<!--        <div class="item item-shiba">-->
+<!--          <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">-->
+<!--            <source src="./static/videos/shiba.mp4"-->
+<!--                    type="video/mp4">-->
+<!--          </video>-->
+<!--        </div>-->
+<!--        <div class="item item-fullbody">-->
+<!--          <video poster="" id="fullbody" autoplay controls muted loop playsinline height="100%">-->
+<!--            <source src="./static/videos/fullbody.mp4"-->
+<!--                    type="video/mp4">-->
+<!--          </video>-->
+<!--        </div>-->
+<!--        <div class="item item-blueshirt">-->
+<!--          <video poster="" id="blueshirt" autoplay controls muted loop playsinline height="100%">-->
+<!--            <source src="./static/videos/blueshirt.mp4"-->
+<!--                    type="video/mp4">-->
+<!--          </video>-->
+<!--        </div>-->
+<!--        <div class="item item-mask">-->
+<!--          <video poster="" id="mask" autoplay controls muted loop playsinline height="100%">-->
+<!--            <source src="./static/videos/mask.mp4"-->
+<!--                    type="video/mp4">-->
+<!--          </video>-->
+<!--        </div>-->
+<!--        <div class="item item-coffee">-->
+<!--          <video poster="" id="coffee" autoplay controls muted loop playsinline height="100%">-->
+<!--            <source src="./static/videos/coffee.mp4"-->
+<!--                    type="video/mp4">-->
+<!--          </video>-->
+<!--        </div>-->
+<!--        <div class="item item-toby">-->
+<!--          <video poster="" id="toby" autoplay controls muted loop playsinline height="100%">-->
+<!--            <source src="./static/videos/toby2.mp4"-->
+<!--                    type="video/mp4">-->
+<!--          </video>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</section>-->
+
+
+
+<section class="" style="padding-bottom: 3rem">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Distilling pre-trained 2D diffusion models into 3D assets has driven remarkable advances in text-to-3D synthesis. However, existing methods typically rely on Score Distillation Sampling (SDS) loss, which involves asymmetric KL divergence—a formulation that inherently favors mode-seeking behavior and limits generation diversity. In this paper, we introduce Dive3D, a novel text-to-3D generation framework that replaces KL-based objectives with Score Implicit Matching (SIM) loss, a score-based objective that effectively mitigates mode collapse. Furthermore, Dive3D integrates both diffusion distillation and reward-guided optimization under a unified divergence perspective. Such reformulation, together with SIM loss, yields significantly more diverse 3D outputs while improving text alignment, human preference, and overall visual fidelity. We validate Dive3D across various 2D-to-3D prompts and find that it consistently outperforms prior methods in qualitative assessments, including diversity, photorealism, and aesthetic appeal. We further evaluate its performance on the GPTEval3D benchmark, comparing against nine state-of-the-art baselines. Dive3D also achieves strong results on quantitative metrics, including text–asset alignment, 3D plausibility, text–geometry consistency, texture quality, and geometric detail.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+    <!-- Paper video. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Method</h2>
+<!--        <div class="publication-video">-->
+<!--          <iframe src="https://www.youtube.com/embed/MrKrnHhk8IA?rel=0&amp;showinfo=0"-->
+<!--                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>-->
+<!--        </div>-->
+        <div>
+        <span class="center"><img src="./static/images/img_1.jpeg" style="width:850px;"></span><br>
+          <!-- <p class="bold-and-large">E-step, draw samples from LDMs: </p>
+            <span class="center"><img src="./static/images/img_13.png" style="width:550px;"></span><br>
+          <br>
+          <p class="bold-and-large">M-step, update forward model through MAP:
+              <span class="center"><img src="./static/images/img_14.png" style="width:550px;"></span><br>
+          </p>
+          <br>
+          * Further details can be found in the paper. -->
+        </div>
+      </div>
+    </div>
+    <!--/ Paper video. -->
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Video Results</h2>
+        <div class="content">
+          <!-- 第一行视频 -->
+          <div class="columns is-multiline">
+            <div class="column is-4">
+              <div class="box">
+                <video controls style="width: 100%;">
+                  <source src="./static/Video/Several large, solid, cube-shaped parcels, wrapped in brown paper and tied with string, each labeled with a different destination, awaiting dispatch in a post office/it16000-test.mp4" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+                <p class="has-text-centered" style="margin-top: 10px;">Several large, solid, cube-shaped parcels</p>
+              </div>
+            </div>
+            <div class="column is-4">
+              <div class="box">
+                <video controls style="width: 100%;">
+                  <source src="./static/Video/Orange monarch butterfly resting on a dandelion/it16000-test.mp4" type="video/mp4">
+                </video>
+                <p class="has-text-centered" style="margin-top: 10px;">Orange monarch butterfly</p>
+              </div>
+            </div>
+            <div class="column is-4">
+              <div class="box">
+                <video controls style="width: 100%;">
+                  <source src="./static/Video/A cat pondering the mysteries of the universe/it16000-test.mp4" type="video/mp4">
+                </video>
+                <p class="has-text-centered" style="margin-top: 10px;">A cat pondering the mysteries</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 第二行视频 -->
+          <div class="columns is-multiline">
+            <div class="column is-4">
+              <div class="box">
+                <video controls style="width: 100%;">
+                  <source src="./static/Video/Floating bonsai tree, roots in mid-air/it16000-test.mp4" type="video/mp4">
+                </video>
+                <p class="has-text-centered" style="margin-top: 10px;">Floating bonsai tree</p>
+              </div>
+            </div>
+            <div class="column is-4">
+              <div class="box">
+                <video controls style="width: 100%;">
+                  <source src="./static/Video/A large, multi-layered, symmetrical wedding cake, with smooth fondant, delicate piping, and lifelike sugar flowers in full bloom, displayed on a silver stand/it16000-test.mp4" type="video/mp4">
+                </video>
+                <p class="has-text-centered" style="margin-top: 10px;">Multi-layered wedding cake</p>
+              </div>
+            </div>
+            <div class="column is-4">
+              <div class="box">
+                <video controls style="width: 100%;">
+                  <source src="./static/Video/A carved wooden bear with a salmon in mouth/it16000-test.mp4" type="video/mp4">
+                </video>
+                <p class="has-text-centered" style="margin-top: 10px;">Carved wooden bear</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 第三行视频 -->
+          <div class="columns is-multiline">
+            <div class="column is-4">
+              <div class="box">
+                <video controls style="width: 100%;">
+                  <source src="./static/Video/A sequence of street lamps, casting pools of light on cobblestone paths as twilight descends/it16000-test.mp4" type="video/mp4">
+                </video>
+                <p class="has-text-centered" style="margin-top: 10px;">Sequence of street lamps</p>
+              </div>
+            </div>
+            <div class="column is-4">
+              <div class="box">
+                <video controls style="width: 100%;">
+                  <source src="./static/Video/A golden retriever plush toy, floppy-eare/it16000-test.mp4" type="video/mp4">
+                </video>
+                <p class="has-text-centered" style="margin-top: 10px;">Golden retriever plush toy</p>
+              </div>
+            </div>
+            <div class="column is-4">
+              <div class="box">
+                <video controls style="width: 100%;">
+                  <source src="./static/Video/A torn hat/it16000-test.mp4" type="video/mp4">
+                </video>
+                <p class="has-text-centered" style="margin-top: 10px;">A torn hat</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Animation. -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+<!--        <h2 class="title is-3">Results</h2>-->
+
+        <!-- Comparison with Stable Diffusion baselines -->
+        <h2 class="title is-4">Comparison with Baselines based on Stable Diffusion</h2>
+        <div class="content has-text-centered">
+          <div style="margin: 20px 0;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <div style="text-align: center; width: 12.5%;">DreamFusion</div>
+              <div style="text-align: center; width: 12.5%;">DreamFusion</div>
+              <div style="text-align: center; width: 12.5%;">Fantasia3D</div>
+              <div style="text-align: center; width: 12.5%;">Fantasia3D</div>
+              <div style="text-align: center; width: 12.5%;">ProlificDreamer</div>
+              <div style="text-align: center; width: 12.5%;">ProlificDreamer</div>
+              <div style="text-align: center; width: 12.5%;">Dive3D (Ours)</div>
+              <div style="text-align: center; width: 12.5%;">Dive3D (Ours)</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <img src="./static/images/figure/prolificvsours/xingxing-dreamfusion1-page-00001.jpg" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/xingxing-dreamfusion2-page-00001.jpg" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/fanta_xingxing_row1_col1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/fanta_xingxing2_row1_col1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/xingxing-prolific1-page-00001.jpg" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/xingxing-prolific2-page-00001.jpg" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/xingxing_row1_col1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/xingxing_row1_col3.png" style="width: 12.5%;">
+            </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+              A chimpanzee dressed like Henry VIII king of England
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <img src="./static/images/figure/prolificvsours/dreamfusion-bunny1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/dreamfusion-bunny2.png" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/fanta-bunny1_row1_col1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/fanta-bunny2_row1_col1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/prolific-bunny1-page-00001.jpg" style="width: 12.5%;">
+              <img src="./static/images/figure/prolificvsours/prolific-bunny3-page-00001.jpg" style="width: 12.5%;">
+              <img src="./static/images/figure/figure1-b/bunny_row1_col4.png" style="width: 12.5%;">
+              <img src="./static/images/figure/figure1-b/bunny_row1_col6.png" style="width: 12.5%;">
+            </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+              A baby bunny sitting on top of a stack of pancakes
+            </div>
+          </div>
+          <p>Dive3D exhibits higher quality, richer texture details, and superior alignment with human preferences, such as accurate clothing styles, and vivid fur texture.</p>
+        </div>
+
+        <!-- Comparison with MVDiffusion baselines -->
+        <h2 class="title is-4">Comparison with Baselines based on MVDiffusion and reward model</h2>
+        <div class="content has-text-centered">
+          <div style="margin: 20px 0;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <div style="text-align: center; width: 12.5%;">MVDream</div>
+              <div style="text-align: center; width: 12.5%;">MVDream</div>
+              <div style="text-align: center; width: 12.5%;">DreamReward</div>
+              <div style="text-align: center; width: 12.5%;">DreamReward</div>
+              <div style="text-align: center; width: 12.5%;">Dive3D (Ours)</div>
+              <div style="text-align: center; width: 12.5%;">Dive3D (Ours)</div>
+              <div style="text-align: center; width: 12.5%;">Dive3D (Ours)</div>
+              <div style="text-align: center; width: 12.5%;">Dive3D (Ours)</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <img src="./static/images/figure/guitar/rgb_0.png" style="width: 12.5%;">
+              <img src="./static/images/figure/guitar/rgb_44.png" style="width: 12.5%;">
+              <img src="./static/images/figure/guitar/dr/it10000-0.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/guitar/dr/it10000-1.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/guitar/it16000-0.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/guitar/it16000-1.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/guitar/it16000-2.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/guitar/it16000-3.png_image_1.png" style="width: 12.5%;">
+            </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+              A guitar resting against an old oak tree
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <img src="./static/images/figure/shell/rgb_0.png" style="width: 12.5%;">
+              <img src="./static/images/figure/shell/rgb_43.png" style="width: 12.5%;">
+              <img src="./static/images/figure/shell/dr/it10000-0.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/shell/dr/it10000-1.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/shell/it16000-0.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/shell/it16000-1.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/shell/it16000-2.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/shell/it16000-3.png_image_1.png" style="width: 12.5%;">
+            </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+              Various hollow, asymmetrical, textured seashells, collected in a sand-filled, clear glass jar with a twine-tied neck, displayed on a windowsill
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <img src="./static/images/figure/sequence/rgb_0.png" style="width: 12.5%;">
+              <img src="./static/images/figure/sequence/rgb_11.png" style="width: 12.5%;">
+              <img src="./static/images/figure/sequence/dr/it10000-0.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/sequence/dr/it10000-1.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/sequence/it16000-0.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/sequence/it16000-1.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/sequence/it16000-2.png_image_1.png" style="width: 12.5%;">
+              <img src="./static/images/figure/sequence/it16000-3.png_image_1.png" style="width: 12.5%;">
+            </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+              A sequence of street lamps, casting pools of light on cobblestone paths as twilight descends
+            </div>
+          </div>
+          <p>Dive3D exhibits more detailed and realistic 3D generation, capturing fine-grained structures such as accurate guitar geometry and transparent glass materials.</p>
+        </div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Score-based Divergence vs. KL Divergence</h2>
+        <div class="content has-text-centered">
+          <div style="margin: 20px 0;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <div style="text-align: center; width: 50%;">KL Divergence</div>
+              <div style="text-align: center; width: 50%;">KL Divergence</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <img src="./static/images/figure/scoredvskl/kl-npc.png" style="width: 45%;">
+              <img src="./static/images/figure/scoredvskl/kl-japan_all.png" style="width: 45%;">
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <div style="text-align: center; width: 50%;">Score Divergence (Ours)</div>
+              <div style="text-align: center; width: 50%;">Score Divergence (Ours)</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <img src="./static/images/figure/scoredvskl/sim-npc.png" style="width: 45%;">
+              <img src="./static/images/figure/scoredvskl/sim-japan_all.png" style="width: 45%;">
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+              <div style="text-align: center; width: 50%;">The blacksmith NPC in the game</div>
+              <div style="text-align: center; width: 50%;">A realistic Japanese building</div>
+            </div>
+          </div>
+          <p>Score-based divergence vs. KL divergence in 2D space sampling. The proposed score-based divergence significantly enhances the diversity of generated 2D samples, yielding more varied backgrounds and clothing in "game character" generation, as well as a broader range of environments, lighting conditions, and architectural features in "Japanese building" generation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Quantitative Results</h2>
+        <div class="content has-text-centered">
+          <p class="has-text-justified">
+            <strong>Quantitative Results on 110 Prompts from the GPTEval3D Benchmark.</strong> We compute all six GPTEval3D metrics—text alignment, 3D plausibility, texture–geometry coherence, geometry details, texture details, and overall score—to comprehensively evaluate 3D generation quality. Dive3D achieves the highest score on every metric, demonstrating its superior performance.
+          </p>
+          <div class="table-container" style="margin: 20px 0;">
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th rowspan="2">Method</th>
+                  <th colspan="6">Prompts from GPTEval3D</th>
+                </tr>
+                <tr>
+                  <th>Alignment</th>
+                  <th>Plausibility</th>
+                  <th>T-G Coherency</th>
+                  <th>Geo Details</th>
+                  <th>Tex Details</th>
+                  <th>Overall</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>DreamFusion</td>
+                  <td>1000.0</td>
+                  <td>1000.0</td>
+                  <td>1000.0</td>
+                  <td>1000.0</td>
+                  <td>1000.0</td>
+                  <td>1000.0</td>
+                </tr>
+                <tr>
+                  <td>DreamGaussian</td>
+                  <td>1100.6</td>
+                  <td>953.6</td>
+                  <td>1158.6</td>
+                  <td>1126.2</td>
+                  <td>1130.8</td>
+                  <td>951.4</td>
+                </tr>
+                <tr>
+                  <td>Fantasia3D</td>
+                  <td>1067.9</td>
+                  <td>891.9</td>
+                  <td>1006.0</td>
+                  <td>1109.3</td>
+                  <td>1027.5</td>
+                  <td>933.5</td>
+                </tr>
+                <tr>
+                  <td>Instant3D</td>
+                  <td>1200.0</td>
+                  <td>1087.6</td>
+                  <td>1152.7</td>
+                  <td>1152.0</td>
+                  <td>1181.3</td>
+                  <td>1097.8</td>
+                </tr>
+                <tr>
+                  <td>Latent-NeRF</td>
+                  <td>1222.3</td>
+                  <td>1144.8</td>
+                  <td>1156.7</td>
+                  <td>1180.5</td>
+                  <td>1160.8</td>
+                  <td>1178.7</td>
+                </tr>
+                <tr>
+                  <td>Magic3D</td>
+                  <td>1152.3</td>
+                  <td>1000.8</td>
+                  <td>1084.4</td>
+                  <td>1178.1</td>
+                  <td>1084.6</td>
+                  <td>961.7</td>
+                </tr>
+                <tr>
+                  <td>ProlificDreamer</td>
+                  <td>1261.8</td>
+                  <td>1058.7</td>
+                  <td>1152.0</td>
+                  <td>1246.4</td>
+                  <td>1180.6</td>
+                  <td>1012.5</td>
+                </tr>
+                <tr>
+                  <td>SyncDreamer</td>
+                  <td>1041.2</td>
+                  <td>968.8</td>
+                  <td>1083.1</td>
+                  <td>1064.2</td>
+                  <td>1045.7</td>
+                  <td>963.5</td>
+                </tr>
+                <tr>
+                  <td>MVDream</td>
+                  <td>1270.5</td>
+                  <td>1147.5</td>
+                  <td>1250.6</td>
+                  <td>1324.9</td>
+                  <td>1255.5</td>
+                  <td>1097.7</td>
+                </tr>
+                <tr>
+                  <td>DreamReward<sup>1</sup></td>
+                  <td>1287.5</td>
+                  <td>1195.0</td>
+                  <td>1254.4</td>
+                  <td>1295.5</td>
+                  <td>1261.6</td>
+                  <td>1193.3</td>
+                </tr>
+                <tr>
+                  <td><strong>DIVE3D (Ours)</strong></td>
+                  <td><strong>1341.0</strong></td>
+                  <td><strong>1249.0</strong></td>
+                  <td><strong>1322.6</strong></td>
+                  <td><strong>1360.2</strong></td>
+                  <td><strong>1329.1</strong></td>
+                  <td><strong>1243.3</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="has-text-justified" style="font-size: 0.9em;">
+            <sup>1</sup> Our metrics differ from those reported in the original DreamReward paper because GPT-4V has been deprecated in GPTEval3D, so we instead use GPT-4o-mini.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{weimin2025dive3d,
+  author    = {Weimin, Bai and Yubo, Li and Wenzheng, Chen and Weijian, Luo and He, Sun},
+  title     = {Dive3D: Diverse Distillation-based Text-to-3D Generation via Score Implicit Matching},
+  journal   = {arXiv preprint arXiv:2506.03184},
+  year      = {2025},
+}</code></pre>
+  </div>
+</section>
+
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="./static/videos/nerfies_paper.pdf">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/keunhong" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+<!--          <p>-->
+<!--            This website is licensed under a <a rel="license"-->
+<!--                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative-->
+<!--            Commons Attribution-ShareAlike 4.0 International License</a>.-->
+<!--          </p>-->
+          <p>
+            The website template is borrowed from <a
+              href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> and licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
